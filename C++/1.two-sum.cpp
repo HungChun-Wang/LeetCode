@@ -12,21 +12,21 @@ using namespace std;
 class Solution {
 public:
     // brute force
-    vector<int> twoSum(vector<int>& nums, int target) {
-        int i, j;
-        vector<int> vec_rst;
+    // vector<int> twoSum(vector<int>& nums, int target) {
+    //     int i, j;
+    //     vector<int> vec_rst;
 
-        for (i = 0; i < nums.size(); i++) {
-            for (j = i + 1; j < nums.size(); j++) {
-                if (nums[i] + nums[j] == target) {
-                    vec_rst.push_back(i);
-                    vec_rst.push_back(j);
-                    return vec_rst;
-                }
-            }
-        }
-        return vec_rst;
-    }
+    //     for (i = 0; i < nums.size(); i++) {
+    //         for (j = i + 1; j < nums.size(); j++) {
+    //             if (nums[i] + nums[j] == target) {
+    //                 vec_rst.push_back(i);
+    //                 vec_rst.push_back(j);
+    //                 return vec_rst;
+    //             }
+    //         }
+    //     }
+    //     return vec_rst;
+    // }
 
     // hash table
     vector<int> twoSum(vector<int>& nums, int target) {
@@ -37,7 +37,8 @@ public:
 
         // add all to hash table
         for (i = 0; i < nums.size(); i++)
-            umap.insert({nums[i], i});
+            // umap.insert({nums[i], i});
+            umap[nums[i]] = i;
         
         // find complement value, then add index to result vector
         for (i = 0; i < nums.size(); i++) {
