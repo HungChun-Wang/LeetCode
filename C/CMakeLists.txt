@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.0.0)
 project(leetcode_C VERSION 0.1.0 LANGUAGES C)
 
 set( dir_all    ${CMAKE_CURRENT_SOURCE_DIR}
-                ${CMAKE_CURRENT_SOURCE_DIR}/algorithm)
+                ${CMAKE_CURRENT_SOURCE_DIR}/algorithm
+                ${CMAKE_CURRENT_SOURCE_DIR}/data_struct)
 
 foreach( dir ${dir_all} )
     aux_source_directory( ${dir} src_all )
