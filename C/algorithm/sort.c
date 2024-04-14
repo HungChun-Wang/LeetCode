@@ -1,25 +1,238 @@
 #include "common_def.h"
 #include "data_struct/linked_list.h"
+#include "sort.h"
 
-void sort_radix(S32 *p_arr, U32 n_size) {
+void sort_test_list_input() {
+    U32 i;
+    listnode_S32_t p_node_src[SORT_TEST_LENGTH];
+    listnode_S32_t *p_iter_src;
+    listnode_S32_t *p_head_src;
+    S32 p_arr[SORT_TEST_LENGTH] = {17, 78, 35, 34, 30, 63, 1, 12, 86, 38, 32};
 
+    for (i = 0; i < SORT_TEST_LENGTH - 1; i++) {
+        p_node_src[i].n_val = p_arr[i];
+        p_node_src[i].p_next = &p_node_src[i + 1];
+    }
+    p_node_src[i].n_val = p_arr[i];
+    p_node_src[i].p_next = NULL;
+
+    p_head_src = sort_merge_list(p_node_src, SORT_TEST_LENGTH);
+
+    printf(" in: ");
+    for (i = 0; i < SORT_TEST_LENGTH; i++)
+        printf("%2d ", p_node_src[i].n_val);
+    printf("\nout: ");
+    p_iter_src = p_head_src;
+    while(p_iter_src) {
+        printf("%2d ", p_iter_src->n_val);
+        p_iter_src = p_iter_src->p_next;
+    }
+    printf("\n");
 }
 
-typedef struct bucket_t {
-    U32 n_num;
-} bucket_t;
+void sort_test_list() {
+    srand(time(NULL));
 
-void sort_bucket(U32 *p_arr, U32 n_size, U32 n_val_max) {
-    U32 *p_arr_bin = calloc(n_val_max >> 10, sizeof(U32));
     U32 i;
+    U8 is_wrong = false;
+    clock_t tic;
+    U32 total_time = 0;
 
-    for (i = 0; i < n_size; i++)
-        p_arr_bin[p_arr[i] >> 10];
+    listnode_S32_t p_node_src[SORT_TEST_LENGTH];
+    listnode_S32_t p_node_dst[SORT_TEST_LENGTH];
+    listnode_S32_t *p_iter_src, *p_head_src;
+    listnode_S32_t *p_iter_dst, *p_head_dst;
+
+    for (U32 n_round = 0; n_round < SORT_TEST_ROUND; n_round++) {
+        for (i = 0; i < SORT_TEST_LENGTH - 1; i++) {
+            p_node_src[i].n_val = rand() % (SORT_VAL_UPPER - SORT_VAL_LOWER) + SORT_VAL_LOWER;
+            p_node_src[i].p_next = &p_node_src[i + 1];
+            p_node_dst[i].n_val = p_node_src[i].n_val;
+            p_node_dst[i].p_next = &p_node_dst[i + 1];
+        }
+        p_node_src[i].n_val = rand() % (SORT_VAL_UPPER - SORT_VAL_LOWER) + SORT_VAL_LOWER;
+        p_node_src[i].p_next = NULL;
+        p_node_dst[i].n_val = p_node_src[i].n_val;
+        p_node_dst[i].p_next = NULL;
+
+        tic = clock();
+
+        p_head_src = sort_insertion_list(p_node_src);
+
+        total_time += (U32)(clock() - tic);
+
+        p_head_dst = sort_merge_list(p_node_dst, SORT_TEST_LENGTH);
+
+        p_iter_src = p_head_src;
+        p_iter_dst = p_head_dst;
+        while(p_iter_src && p_iter_dst) {
+            if (p_iter_src->n_val != p_iter_dst->n_val) {
+                is_wrong = true;
+                break;
+            }
+            p_iter_src = p_iter_src->p_next;
+            p_iter_dst = p_iter_dst->p_next;
+        }
+
+        if (is_wrong) {
+            printf(" in: ");
+            for (i = 0; i < SORT_TEST_LENGTH; i++)
+                printf("%2d ", p_node_src[i].n_val);
+            printf("\nout: ");
+            p_iter_src = p_head_src;
+            while(p_iter_src) {
+                printf("%2d ", p_iter_src->n_val);
+                p_iter_src = p_iter_src->p_next;
+            }
+            printf("\nref: ");
+            p_iter_dst = p_head_dst;
+            while(p_iter_dst) {
+                printf("%2d ", p_iter_dst->n_val);
+                p_iter_dst = p_iter_dst->p_next;
+            }
+            printf("\n");
+            break;
+        }
+    }
+    printf("time: %d us\n", total_time);
+}
+
+void sort_test() {
+    srand(time(NULL));
+
+    U32 i;
+    S32 p_arr[SORT_TEST_LENGTH];
+    U32 p_arr_src[SORT_TEST_LENGTH];
+    U32 p_arr_ref[SORT_TEST_LENGTH];
+    U8 is_wrong = false;
+    clock_t tic;
+    U32 total_time = 0;
+
+    for (U32 n_round = 0; n_round < SORT_TEST_ROUND; n_round++) {
+        for (i = 0; i < SORT_TEST_LENGTH; i++) {
+            p_arr[i] = rand() % (SORT_VAL_UPPER - SORT_VAL_LOWER) + SORT_VAL_LOWER;
+            p_arr_src[i] = p_arr[i];
+            p_arr_ref[i] = p_arr[i];
+        }
+
+        tic = clock();
+        // sort_merge(p_arr, SORT_TEST_LENGTH);         // ~45 ms
+        // sort_quick(p_arr, SORT_TEST_LENGTH);         // ~90 ms
+        // sort_shell(p_arr, SORT_TEST_LENGTH);         // ~140 ms
+        // sort_insertion(p_arr, SORT_TEST_LENGTH);     // ~570 ms
+        // sort_selection(p_arr, SORT_TEST_LENGTH);     // ~1250 ms
+        // sort_shaker(p_arr, SORT_TEST_LENGTH);        // ~1800 ms
+        // sort_bubble(p_arr, SORT_TEST_LENGTH);        // ~1800 ms
+        
+        // value depended sorting
+        // sort_counting(p_arr, SORT_TEST_LENGTH, SORT_VAL_UPPER);
+        // sort_counting_stable(p_arr, SORT_TEST_LENGTH, SORT_VAL_UPPER);
+        // sort_bucket(p_arr, SORT_TEST_LENGTH, SORT_VAL_UPPER, 100);
+        sort_radix(p_arr, SORT_TEST_LENGTH);
+
+        total_time += (U32)(clock() - tic);
+
+        sort_merge(p_arr_ref, SORT_TEST_LENGTH);
+
+        for (i = 0; i < SORT_TEST_LENGTH - 1; i++)
+            if (p_arr[i] != p_arr_ref[i])
+                is_wrong = true;
+
+        if (is_wrong) {
+            printf(" input: ");
+            for (i = 0; i < SORT_TEST_LENGTH; i++)
+                printf("%2d ", p_arr_src[i]);
+            printf("\noutput: ");
+            for (i = 0; i < SORT_TEST_LENGTH; i++)
+                printf("%2d ", p_arr[i]);
+            printf("\n   ref: ");
+            for (i = 0; i < SORT_TEST_LENGTH; i++)
+                printf("%2d ", p_arr_ref[i]);
+            printf("\n");
+            break;
+        }
+    }
+    printf("time: %d us\n", total_time);
+}
+
+void sort_radix(S32 *p_arr, U32 n_size) {
+    if (!p_arr) return;
     
-    free(p_arr_bin);
+    U8 is_empty = false;
+    U32 i, k;
+    U32 n_digit = 0;
+    U32 n_radix = 16;
+    U32 n_mask = n_radix - 1;
+    U32 n_val_shift;
+    list_S32_t *p_bins = calloc(n_radix, sizeof(list_S32_t));
+    list_S32_t *p_bin;
+    listnode_S32_t *p_node;
+
+    while (!is_empty && n_digit < 8) {
+        is_empty = true;
+        
+        for (i = 0; i < n_size; i++) {
+            n_val_shift = p_arr[i] >> (n_digit << 2);
+            p_bin = &p_bins[n_val_shift & n_mask];
+            p_node = malloc(sizeof(listnode_S32_t));
+            p_node->n_val = p_arr[i];
+            p_node->p_next = p_bin->p_head;
+            p_bin->p_head = p_node;
+            
+            if (n_val_shift >= n_radix)
+                is_empty = false;
+        }
+
+        i = n_size;
+        for (k = n_radix - 1; k < n_radix; k--) {
+            p_bin = &p_bins[k];
+            while (p_bin->p_head) {
+                p_arr[--i] = p_bin->p_head->n_val;
+                p_node = p_bin->p_head->p_next;
+                free(p_bin->p_head);
+                p_bin->p_head = p_node;
+            }
+        }
+        n_digit++;
+    }
+}
+
+void sort_bucket(U32 *p_arr, U32 n_size, U32 n_val_max, U32 n_num_bucket) {
+    if (!p_arr) return;
+    
+    U32 i, k;
+    list_S32_t *p_buckets = calloc(n_num_bucket, sizeof(list_S32_t));
+    list_S32_t *p_bucket;
+    listnode_S32_t *p_node;
+    U32 n_interval = n_val_max / n_num_bucket + 1;
+
+    for (i = 0; i < n_size; i++) {
+        p_bucket = &p_buckets[p_arr[i] / n_interval];
+        p_node = malloc(sizeof(listnode_S32_t));
+        p_node->n_val = p_arr[i];
+        p_node->p_next = p_bucket->p_head;
+        p_bucket->p_head = p_node;
+        p_bucket->n_len++;
+    }
+    
+    i = 0;
+    for (k = 0; k < n_num_bucket; k++) {
+        p_bucket = &p_buckets[k];
+        p_bucket->p_head = sort_insertion_list(p_bucket->p_head);
+        while (p_bucket->p_head) {
+            p_arr[i++] = p_bucket->p_head->n_val;
+            p_node = p_bucket->p_head->p_next;
+            free(p_bucket->p_head);
+            p_bucket->p_head = p_node;
+        }
+    }
+
+    free(p_buckets);
 }
 
 void sort_counting_stable(U32 *p_arr, U32 n_size, U32 n_val_max) {
+    if (!p_arr) return;
+    
     U32 *p_arr_cnt = calloc(n_val_max, sizeof(U32));
     U32 *p_arr_buf = calloc(n_size, sizeof(U32));
     U32 i, k;
@@ -37,9 +250,12 @@ void sort_counting_stable(U32 *p_arr, U32 n_size, U32 n_val_max) {
     memcpy(p_arr, p_arr_buf, sizeof(U32) * n_size);
 
     free(p_arr_cnt);
+    free(p_arr_buf);
 }
 
 void sort_counting(U32 *p_arr, U32 n_size, U32 n_val_max) {
+    if (!p_arr) return;
+    
     U32 *p_arr_cnt = calloc(n_val_max, sizeof(S32));
     U32 i, k;
     U32 n_base;
@@ -57,7 +273,9 @@ void sort_counting(U32 *p_arr, U32 n_size, U32 n_val_max) {
     free(p_arr_cnt);
 }
 
-void sort_merge_list(list_S32_t *p_list, U32 n_size) {
+listnode_S32_t* sort_merge_list(listnode_S32_t *p_head, U32 n_len) {
+    if (!p_head) return p_head;
+    
     U32 n_size_seg;
     U32 n_step_cnt;
     U32 n_remain_node;
@@ -68,11 +286,11 @@ void sort_merge_list(list_S32_t *p_list, U32 n_size) {
     listnode_S32_t *p_head_next_seg;
     listnode_S32_t *p_tail_last_seg;
 
-    for (n_size_seg = 1; n_size_seg < n_size; n_size_seg <<= 1) {
-        n_remain_node = n_size;
-        p_head_next_seg = p_list->p_head;
+    for (n_size_seg = 1; n_size_seg < n_len; n_size_seg <<= 1) {
+        n_remain_node = n_len;
+        p_head_next_seg = p_head;
         p_tail_last_seg = NULL;
-        while (n_remain_node <= n_size) {
+        while (n_remain_node <= n_len) {
             dummy.p_next = p_head_next_seg;
             p_node_A = &dummy;
             p_node_B = &dummy;
@@ -120,17 +338,50 @@ void sort_merge_list(list_S32_t *p_list, U32 n_size) {
             if (p_tail_last_seg)
                 p_tail_last_seg->p_next = dummy.p_next;
 
-            if (n_remain_node == n_size)
-                p_list->p_head = dummy.p_next;
+            if (n_remain_node == n_len)
+                p_head = dummy.p_next;
 
             p_tail_last_seg = p_node_seg;
 
             n_remain_node -= (n_size_seg << 1);
         }
     }
+    return p_head;
+}
+
+listnode_S32_t* sort_insertion_list(listnode_S32_t *p_head) {
+    if (!p_head) return p_head;
+
+    U8 is_wap;
+    listnode_S32_t dummy = {0, p_head};
+    listnode_S32_t *p_curr = dummy.p_next;
+    listnode_S32_t *p_next = dummy.p_next;
+    listnode_S32_t *p_back;
+
+    while (p_curr->p_next != NULL) {
+        p_back = &dummy;
+        is_wap = false;
+        while (p_back != p_curr) {
+            if (p_curr->p_next->n_val < p_back->p_next->n_val) {
+                p_next = p_curr->p_next->p_next;
+                p_curr->p_next->p_next = p_back->p_next;
+                p_back->p_next = p_curr->p_next;
+                p_curr->p_next = p_next;
+                is_wap = true;
+                break;
+            }
+            p_back = p_back->p_next;
+        }
+        if (!is_wap) {
+            p_curr = p_curr->p_next;
+        }
+    }
+    return dummy.p_next;
 }
 
 void sort_merge(S32 *p_arr, U32 n_size) {
+    if (!p_arr) return;
+
     U32 n_left, n_mid;
     U32 n_len_A, n_len_B;
     U32 n_size_seg, n_size_left;
@@ -193,6 +444,8 @@ void sort_merge(S32 *p_arr, U32 n_size) {
 }
 
 void sort_quick(S32 *p_arr, U32 n_size) {
+    if (!p_arr) return;
+    
     U32 i, j;
     U32 n_left, n_right, n_pivot;
     U32 n_stack[n_size];
@@ -228,6 +481,8 @@ void sort_quick(S32 *p_arr, U32 n_size) {
 }
 
 void sort_shell(S32 *p_arr, U32 n_size) {
+    if (!p_arr) return;
+    
     U32 n_step, n_group;
     U32 i, j;
     S32 n_temp;
@@ -248,6 +503,8 @@ void sort_shell(S32 *p_arr, U32 n_size) {
 }
 
 void sort_shaker(S32 *p_arr, U32 n_size) {
+    if (!p_arr) return;
+    
     U32 i, j, n_temp;
     U32 n_round = 0;
     U32 n_left = 0;
@@ -266,6 +523,8 @@ void sort_shaker(S32 *p_arr, U32 n_size) {
 }
 
 void sort_insertion(S32 *p_arr, U32 n_size) {
+    if (!p_arr) return;
+    
     U32 i, j;
     S32 n_temp;
     
@@ -281,6 +540,8 @@ void sort_insertion(S32 *p_arr, U32 n_size) {
 }
 
 void sort_selection(S32 *p_arr, U32 n_size) {
+    if (!p_arr) return;
+    
     U32 i, j, n_temp, n_min_idx;
 
     for (i = 0; i < n_size - 1; i++) {
@@ -295,6 +556,8 @@ void sort_selection(S32 *p_arr, U32 n_size) {
 }
 
 void sort_bubble(S32 *p_arr, U32 n_size) {
+    if (!p_arr) return;
+    
     U32 i, j;
     S32 n_temp;
 
@@ -302,119 +565,4 @@ void sort_bubble(S32 *p_arr, U32 n_size) {
         for (j = 0; j < n_size - i - 1; j++)
             if (p_arr[j] > p_arr[j + 1])
                 M_SWAP(p_arr[j] ,p_arr[j + 1], n_temp);
-}
-
-#define SORT_TEST_ROUND (1000)      // 1000
-
-// #define SORT_TEST_LENGTH (1 << 10)   // 1 << 10
-// #define SORT_VAL_LOWER  (0)
-// #define SORT_VAL_UPPER  (10000)   // INT_MAX
-#define SORT_TEST_LENGTH (11)
-#define SORT_VAL_LOWER  (0)
-#define SORT_VAL_UPPER  (100)
-
-void sort_test_list() {
-    srand(time(NULL));
-
-    U32 i;
-    U8 is_wrong = false;
-    clock_t tic;
-    U32 total_time;
-
-    listnode_S32_t p_node[SORT_TEST_LENGTH];
-    listnode_S32_t *p_curr;
-    list_S32_t list = {0, p_node};
-
-    for (U32 n_round = 0; n_round < SORT_TEST_ROUND; n_round++) {
-        for (i = 0; i < SORT_TEST_LENGTH - 1; i++) {
-            p_node[i].n_val = rand() % (SORT_VAL_UPPER - SORT_VAL_LOWER) + SORT_VAL_LOWER;
-            p_node[i].p_next = &p_node[i + 1];
-        }
-        p_node[i].n_val = rand() % (SORT_VAL_UPPER - SORT_VAL_LOWER) + SORT_VAL_LOWER;
-        p_node[i].p_next = NULL;
-
-        tic = clock();
-        sort_merge_list(&list, SORT_TEST_LENGTH);         // ~45 ms
-
-        total_time += (U32)(clock() - tic);
-
-        p_curr = list.p_head;
-        while(p_curr && p_curr->p_next) {
-            if (p_curr->n_val > p_curr->p_next->n_val)
-                is_wrong = true;
-            p_curr = p_curr->p_next;
-        }
-
-        if (is_wrong) {
-            printf(" input: ");
-            for (i = 0; i < SORT_TEST_LENGTH; i++)
-                printf("%2d ", p_node[i].n_val);
-            printf("\noutput: ");
-            p_curr = list.p_head;
-            while(p_curr) {
-                printf("%2d ", p_curr->n_val);
-                p_curr = p_curr->p_next;
-            }
-            printf("\n");
-            break;
-        }
-    }
-    printf("time: %d us\n", total_time);
-}
-
-void sort_test() {
-    srand(time(NULL));
-
-    U32 i;
-    S32 p_arr[SORT_TEST_LENGTH];
-    U32 p_arr_src[SORT_TEST_LENGTH];
-    U32 p_arr_ref[SORT_TEST_LENGTH];
-    U8 is_wrong = false;
-    clock_t tic;
-    U32 total_time;
-
-    for (U32 n_round = 0; n_round < SORT_TEST_ROUND; n_round++) {
-        for (i = 0; i < SORT_TEST_LENGTH; i++) {
-            p_arr[i] = rand() % (SORT_VAL_UPPER - SORT_VAL_LOWER) + SORT_VAL_LOWER;
-            p_arr_src[i] = p_arr[i];
-            p_arr_ref[i] = p_arr[i];
-        }
-
-        tic = clock();
-        // sort_merge(p_arr, SORT_TEST_LENGTH);         // ~45 ms
-        sort_quick(p_arr, SORT_TEST_LENGTH);         // ~90 ms
-        // sort_shell(p_arr, SORT_TEST_LENGTH);         // ~140 ms
-        // sort_insertion(p_arr, SORT_TEST_LENGTH);     // ~570 ms
-        // sort_selection(p_arr, SORT_TEST_LENGTH);     // ~1250 ms
-        // sort_shaker(p_arr, SORT_TEST_LENGTH);        // ~1800 ms
-        // sort_bubble(p_arr, SORT_TEST_LENGTH);        // ~1800 ms
-        
-        // value depended sorting
-        // sort_counting(p_arr, SORT_TEST_LENGTH, SORT_VAL_UPPER);
-        // sort_counting_stable(p_arr, SORT_TEST_LENGTH, SORT_VAL_UPPER);
-        // sort_bucket(p_arr, SORT_TEST_LENGTH, SORT_VAL_UPPER);
-
-        total_time += (U32)(clock() - tic);
-
-        sort_merge(p_arr_ref, SORT_TEST_LENGTH);
-
-        for (i = 0; i < SORT_TEST_LENGTH - 1; i++)
-            if (p_arr[i] != p_arr_ref[i])
-                is_wrong = true;
-
-        if (is_wrong) {
-            printf(" input: ");
-            for (i = 0; i < SORT_TEST_LENGTH; i++)
-                printf("%2d ", p_arr_src[i]);
-            printf("\noutput: ");
-            for (i = 0; i < SORT_TEST_LENGTH; i++)
-                printf("%2d ", p_arr[i]);
-            printf("\n   ref: ");
-            for (i = 0; i < SORT_TEST_LENGTH; i++)
-                printf("%2d ", p_arr_ref[i]);
-            printf("\n");
-            break;
-        }
-    }
-    printf("time: %d us\n", total_time);
 }
