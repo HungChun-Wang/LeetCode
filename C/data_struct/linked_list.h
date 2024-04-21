@@ -1,4 +1,4 @@
-#include "common_def.h"
+#pragma once
 
 typedef struct listnode_S32_t {
     S32 n_val;
