@@ -13,7 +13,7 @@ typedef unsigned short  U16;
 typedef unsigned int    U32;
 
 #define M_SWAP(x, y, buffer) {(buffer) = (x); (x) = (y); (y) = (buffer);}
-#define M_MAX(x, y) ((x > y) ? x : y)
-#define M_MIN(x, y) ((x < y) ? x : y)
+#define M_MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define M_MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define BIT(x)      (1 << (x))
 #define BIT_NUM_32  (32)
