@@ -1,3 +1,3 @@
 int main(int, char**){
-    sort_test();
+    AVL_test();
 }

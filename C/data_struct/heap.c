@@ -135,7 +135,7 @@ S32 max_heap_extract(heap_t *p_heap) {
     return s32_val;
 }
 
-static bool heapify_forward_max(heap_t *p_heap, U32 u32_idx) {
+static inline bool heapify_forward_max(heap_t *p_heap, U32 u32_idx) {
     if (!p_heap || !p_heap->ps32_arr) return false;
     if (u32_idx >= p_heap->u32_size) return false;
 
@@ -163,7 +163,7 @@ static bool heapify_forward_max(heap_t *p_heap, U32 u32_idx) {
     return true;
 }
 
-static bool heapify_backward_max(heap_t *p_heap, U32 u32_idx) {
+static inline bool heapify_backward_max(heap_t *p_heap, U32 u32_idx) {
     if (!p_heap || !p_heap->ps32_arr) return false;
     if (u32_idx >= p_heap->u32_size) return false;
 

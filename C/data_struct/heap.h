@@ -24,6 +24,6 @@ S32 max_heap_delete(heap_t *p_heap, U32 u32_idx);
 
 S32 max_heap_extract(heap_t *p_heap);
 
-static bool heapify_forward_max(heap_t *p_heap, U32 u32_idx);
+static inline bool heapify_forward_max(heap_t *p_heap, U32 u32_idx);
 
-static bool heapify_backward_max(heap_t *p_heap, U32 u32_idx);
+static inline bool heapify_backward_max(heap_t *p_heap, U32 u32_idx);
